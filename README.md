@@ -1,8 +1,8 @@
 # crash-rebound-rider
 
 [![make.fun · btc-race-24h-20261115-0828](https://make.fun/badge/btc-race-24h-20261115-0828.svg)](https://make.fun/bounty/btc-race-24h-20261115-0828?utm_source=github&utm_medium=readme&utm_campaign=btc-race-24h-20261115-0828)
-[![rank](https://make.fun/badge/btc-race-24h-20261115-0828/incsx/crash-rebound-rider/rank.svg)](https://make.fun/bounty/btc-race-24h-20261115-0828/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=btc-race-24h-20261115-0828)
-[![reward](https://make.fun/badge/btc-race-24h-20261115-0828/incsx/crash-rebound-rider/reward.svg)](https://make.fun/bounty/btc-race-24h-20261115-0828?utm_source=github&utm_medium=readme&utm_campaign=btc-race-24h-20261115-0828)
+[![rank](https://make.fun/badge/btc-race-24h-20261115-0828/testnetFDN/crash-rebound-rider/rank.svg)](https://make.fun/bounty/btc-race-24h-20261115-0828/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=btc-race-24h-20261115-0828)
+[![reward](https://make.fun/badge/btc-race-24h-20261115-0828/testnetFDN/crash-rebound-rider/reward.svg)](https://make.fun/bounty/btc-race-24h-20261115-0828?utm_source=github&utm_medium=readme&utm_campaign=btc-race-24h-20261115-0828)
 
 A long-only CBBTC/USDC trading bot for [make.fun](https://make.fun) bounty
 [btc-race-24h-20261115-0828](https://make.fun/bounty/btc-race-24h-20261115-0828) —
