@@ -227,7 +227,6 @@ await runBars({
       }
       const washS = (swingHigh - c) / swingHigh;
       const freshOk = sFreshLowIdx >= 0 && i - sFreshLowIdx > S_GUARD_BARS;
-      if (i >= 1395 && i <= 1412) console.error(`S-check i=${i} c=${c} up1=${c > closes[i - 1]!} washS=${washS.toFixed(4)} swingHigh=${swingHigh} swingLow=${swingLow} freshOk=${freshOk} (idx=${sFreshLowIdx} gap=${i - sFreshLowIdx}) cool=${sCooldown} losses=${sLosses} emaR=${emaReady} emaRise=${emaReady && emaHist.length >= C_RISE ? ema > emaHist[0]! : '?'}`);
       if (washS >= S_WASH_PCT && freshOk && sCooldown === 0 && sLosses < S_MAX_LOSSES && c > swingLow * (1 + 0.002) && state.cash >= minNotional) {
         posMode = 'S';
         entryPx = c;
