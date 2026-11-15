@@ -61,8 +61,8 @@ const S_MAX_LOSSES = 99;
 const S_COOLDOWN = 12;
 const TREND_SPAN = 240;
 const TREND_LOOK = 60;
-const CHOP_TREND = 0.012;
-const CHOP_VOL = 0.03;
+const CHOP_TREND = 0.008;
+const CHOP_VOL = 0.02;
 const SMA_SPAN = 30;
 const SMA_LOOK = 12;
 
@@ -95,11 +95,13 @@ const closes: number[] = [];
 const hiA = new Rolling(A_WIN, true);
 const hiC = new Rolling(C_WIN, true);
 const hiS = new Rolling(S_WIN_FALLBACK, true);
+const lowGuard = new Rolling(360, false);
 const loS = new Rolling(S_LOWIN_FALLBACK, false);
 let washHigh = 0;
 let pullHigh = 0;
 let swingHigh = 0;
 let swingLow = 0;
+let guardLow = 0;
 
 // EMA(C_SPAN) and EMA(TREND_SPAN), each seeded as the mean of its first span of closes
 const emaWarm: number[] = [];
@@ -128,6 +130,8 @@ let sellMode: 'A' | 'C' | 'S' | null = null;
 let sLosses = 0;
 let sCooldown = 0;
 let sEntryI = -1;
+let sFreshLowIdx = -1;
+let sFreshLowVal = Infinity;
 
 await runBars({
   onBatch(state: BarsState, batch: Batch) {
@@ -164,10 +168,16 @@ await runBars({
     hiC.push(c, i, closes);
     hiS.push(c, i, closes);
     loS.push(c, i, closes);
+    lowGuard.push(c, i, closes);
     washHigh = hiA.value;
     pullHigh = hiC.value;
     swingHigh = hiS.value;
     swingLow = loS.value;
+    guardLow = lowGuard.value;
+    if (sFreshLowIdx === -1 || guardLow < sFreshLowVal) {
+      sFreshLowIdx = i;
+      sFreshLowVal = guardLow;
+    }
     // EMAs
     if (!emaReady) {
       emaWarm.push(c);
@@ -269,8 +279,9 @@ await runBars({
       const trendStr = trReady && trHist.length >= TREND_LOOK ? Math.abs(tr - trHist[0]!) / tr : 1;
       const vol30 = (swingHigh - swingLow) / c;
       const meanRising = smaHist.length >= SMA_LOOK && sma >= smaHist[0]!; // jangan scalping saat mean turun
+      const freshOk = sFreshLowIdx >= 0 && i - sFreshLowIdx > 45; // gak nyandung setelah fresh low 6 jam
       const chopMode = trendStr < CHOP_TREND && vol30 < CHOP_VOL;
-      if (chopMode && meanRising && smaWarm.length === SMA_SPAN && c <= sma * (1 - S_WASH_PCT) && sCooldown === 0 && sLosses < S_MAX_LOSSES) {
+      if (chopMode && meanRising && freshOk && smaWarm.length === SMA_SPAN && c <= sma * (1 - S_WASH_PCT) && sCooldown === 0 && sLosses < S_MAX_LOSSES) {
         const spend = (state.cash * S_SIZE_NUM) / S_SIZE_DEN;
         if (spend >= minNotional) {
           posMode = 'S';
