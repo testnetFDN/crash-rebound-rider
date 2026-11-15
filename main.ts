@@ -81,16 +81,16 @@ await runBars({
       probeSelling = true;
       return [{ side: 'buy', symbol: bar.symbol, notional_quote_units: minNotional, max_slippage_bps: BUY_MAX_SLIPPAGE_BPS }];
     }
-    if (probeSelling && held !== undefined && BigInt(held.cost_quote_units) <= 2n * minNotional) {
+    if (probeSelling && held !== undefined && held.cost <= 2n * minNotional) {
       probeSelling = false;
       return [{ side: 'sell', symbol: bar.symbol, qty: held.qty, max_slippage_bps: SELL_MAX_SLIPPAGE_BPS }];
     }
 
     // main position: exits first
-    if (held !== undefined && BigInt(held.cost_quote_units) > 2n * minNotional) {
+    if (held !== undefined && held.cost > 2n * minNotional) {
       if (c > maxSinceEntry) maxSinceEntry = c;
-      const posVal = state.value(bar.symbol, BigInt(held.qty));
-      const roi = Number(posVal - BigInt(held.cost_quote_units)) / Number(held.cost_quote_units);
+      const posVal = state.value(bar.symbol, held.qty);
+      const roi = Number(posVal - held.cost) / Number(held.cost);
       const trail = (maxSinceEntry - c) / maxSinceEntry;
       const hard = (entryPx - c) / entryPx;
       if (roi >= TAKE_PROFIT || trail >= TAKE_TRAIL || hard >= STOP) {
