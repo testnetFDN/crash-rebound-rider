@@ -196,7 +196,9 @@ await runBars({
       const posVal = state.value(bar.symbol, held.qty);
       const roi = Number(posVal - held.cost) / Number(held.cost);
       const trail = (maxSinceEntry - c) / maxSinceEntry;
-      const hard = (entryPx - c) / entryPx;
+      // the big A ride's emergency stop reads the bar's LOW: on a knife move it fires one bar
+      // earlier than a close-based stop would, for materially less slippage damage
+      const hard = posMode === 'A' ? (entryPx - Number(bar.l)) / entryPx : (entryPx - c) / entryPx;
       const P = posMode === 'C' ? { tp: C_TP, ts: C_TRAIL, sl: C_STOP } : posMode === 'S' ? { tp: S_TP, ts: S_TRAIL, sl: S_STOP } : { tp: A_TP, ts: A_TRAIL, sl: A_STOP };
       if (roi >= P.tp || trail >= P.ts || hard >= P.sl) {
         sellSent = true;
