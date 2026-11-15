@@ -64,6 +64,7 @@ const TREND_LOOK = 60;
 const CHOP_TREND = 0.012;
 const CHOP_VOL = 0.03;
 const SMA_SPAN = 30;
+const SMA_LOOK = 12;
 
 const BUY_MAX_SLIPPAGE_BPS = 1000;
 const SELL_MAX_SLIPPAGE_BPS = 10_000;
@@ -114,6 +115,7 @@ const trHist: number[] = [];
 const smaWarm: number[] = [];
 let smaAcc = 0;
 let sma = 0;
+const smaHist: number[] = [];
 
 let probeArmed = true;
 let probeSelling = false;
@@ -191,11 +193,15 @@ await runBars({
       if (trHist.length >= TREND_LOOK) trHist.shift();
       trHist.push(tr);
     }
-    // SMA(SMA_SPAN)
+    // SMA(SMA_SPAN) + riwayat 12 barnya (guard mean-tidak-turun)
     smaWarm.push(c);
     smaAcc += c;
     if (smaWarm.length > SMA_SPAN) smaAcc -= smaWarm.shift()!;
     if (smaWarm.length === SMA_SPAN) sma = smaAcc / SMA_SPAN;
+    if (smaWarm.length === SMA_SPAN) {
+      if (smaHist.length >= SMA_LOOK) smaHist.shift();
+      smaHist.push(sma);
+    }
 
     if (state.warmingUp) return [];
 
@@ -262,8 +268,9 @@ await runBars({
       // chop scalper: range-bound, mean-reversion under the SMA
       const trendStr = trReady && trHist.length >= TREND_LOOK ? Math.abs(tr - trHist[0]!) / tr : 1;
       const vol30 = (swingHigh - swingLow) / c;
+      const meanRising = smaHist.length >= SMA_LOOK && sma >= smaHist[0]!; // jangan scalping saat mean turun
       const chopMode = trendStr < CHOP_TREND && vol30 < CHOP_VOL;
-      if (chopMode && smaWarm.length === SMA_SPAN && c <= sma * (1 - S_WASH_PCT) && sCooldown === 0 && sLosses < S_MAX_LOSSES) {
+      if (chopMode && meanRising && smaWarm.length === SMA_SPAN && c <= sma * (1 - S_WASH_PCT) && sCooldown === 0 && sLosses < S_MAX_LOSSES) {
         const spend = (state.cash * S_SIZE_NUM) / S_SIZE_DEN;
         if (spend >= minNotional) {
           posMode = 'S';
