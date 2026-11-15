@@ -38,7 +38,7 @@ const C_TP = 0.03;
 const C_TRAIL = 0.012;
 const C_STOP = 0.012;
 
-const BUY_MAX_SLIPPAGE_BPS = 200;
+const BUY_MAX_SLIPPAGE_BPS = 1000;
 const SELL_MAX_SLIPPAGE_BPS = 10_000;
 
 const closes: number[] = [];

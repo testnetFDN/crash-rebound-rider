@@ -15,6 +15,9 @@ the position back on take-profit, a trailing stop or a hard stop.
 
 - **Washout**: the close is 3.5% below the highest close of the last 90 minutes — a
   velocity filter that only a genuine capitulation trips; a slow drift never does.
+- **Trend-pullback rider**: while the EMA(360) rises and the close holds above it, buy a
+  1% pullback off the 45-minute high on its first up-close (+3% / 1.2% trail / 1.2% stop)
+  — insurance for windows that never crash.
 - **Confirmation**: the first close above the previous close after the washout — the
   buy lands near the low, not in the falling knife.
 - **Exit**: +4.5% over the filled cost, a 2% trailing stop off the best close since the
