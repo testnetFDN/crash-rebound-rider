@@ -50,7 +50,7 @@ const C_STOP = 0.012;
 // module S: chop scalper (mean-reversion, regime-gated)
 const S_WIN_FALLBACK = 45; // rolling max window feeding the range/vol measure
 const S_LOWIN_FALLBACK = 20; // rolling min window feeding the range/vol measure
-const S_WASH_PCT = 0.0045;
+const S_WASH_PCT = 0.0035;
 const S_TP = 0.006;
 const S_TRAIL = 0.02;
 const S_STOP = 0.012;
@@ -61,7 +61,7 @@ const S_MAX_LOSSES = 99;
 const S_COOLDOWN = 12;
 const TREND_SPAN = 240;
 const TREND_LOOK = 60;
-const CHOP_TREND = 0.008;
+const CHOP_TREND = 0.0012;
 const CHOP_VOL = 0.02;
 const SMA_SPAN = 30;
 const SMA_LOOK = 12;
