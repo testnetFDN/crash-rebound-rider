@@ -50,14 +50,15 @@ const C_STOP = 0.012;
 // module S: chop scalper (mean-reversion, regime-gated)
 const S_WIN_FALLBACK = 45; // rolling max window feeding the range/vol measure
 const S_LOWIN_FALLBACK = 20; // rolling min window feeding the range/vol measure
-const S_WASH_PCT = 0.006;
-const S_TP = 0.008;
-const S_TRAIL = 0.008;
-const S_STOP = 0.008;
-const S_SIZE_NUM = 40n; // 40% of cash per scalper ride
+const S_WASH_PCT = 0.0045;
+const S_TP = 0.006;
+const S_TRAIL = 0.02;
+const S_STOP = 0.012;
+const S_TIME_BARS = 16;
+const S_SIZE_NUM = 60n; // 60% of cash per scalper ride
 const S_SIZE_DEN = 100n;
-const S_MAX_LOSSES = 6;
-const S_COOLDOWN = 45;
+const S_MAX_LOSSES = 99;
+const S_COOLDOWN = 12;
 const TREND_SPAN = 240;
 const TREND_LOOK = 60;
 const CHOP_TREND = 0.012;
@@ -124,6 +125,7 @@ let sellCost = 0n;
 let sellMode: 'A' | 'C' | 'S' | null = null;
 let sLosses = 0;
 let sCooldown = 0;
+let sEntryI = -1;
 
 await runBars({
   onBatch(state: BarsState, batch: Batch) {
@@ -131,6 +133,7 @@ await runBars({
     if (!bar) return [];
     const c = Number(bar.c);
     const minNotional = BigInt(state.hello.fees.min_notional_quote_units);
+    const i = closes.length; // index the current bar will occupy once pushed below
 
     // settle the sell sent last bar: the scalper's loss counter and its cooldown
     for (const f of batch.fills) {
@@ -150,11 +153,11 @@ await runBars({
         entryPx = Number(f.price);
         maxSinceEntry = Number(f.price);
         posMode = posMode ?? 'A';
+        if (posMode === 'S') sEntryI = i;
       }
     }
 
     closes.push(c);
-    const i = closes.length - 1;
     hiA.push(c, i, closes);
     hiC.push(c, i, closes);
     hiS.push(c, i, closes);
@@ -228,7 +231,8 @@ await runBars({
       const P = posMode === 'C' ? { tp: C_TP, ts: C_TRAIL, sl: C_STOP } : posMode === 'S' ? { tp: S_TP, ts: S_TRAIL, sl: S_STOP } : { tp: A_TP, ts: A_TRAIL, sl: A_STOP };
       const washA = (washHigh - c) / washHigh;
       const pivot = posMode === 'S' && washA >= A_WASH_PCT; // a real washout while scalping: hand back to A
-      if (roi >= P.tp || trail >= P.ts || hard >= P.sl || pivot) {
+      const timeUp = posMode === 'S' && sEntryI >= 0 && i - sEntryI >= S_TIME_BARS; // neither target nor stop in 16 minutes: flat
+      if (roi >= P.tp || trail >= P.ts || hard >= P.sl || timeUp || pivot) {
         sellSent = true;
         sellCost = held.cost;
         sellMode = posMode;
